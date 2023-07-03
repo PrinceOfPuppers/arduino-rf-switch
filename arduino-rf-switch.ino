@@ -17,8 +17,8 @@ RCSwitch s = RCSwitch();
 
 // calibration defines
 #define CALIBRATE_DELAY 2
-#define CALIBRATE_THRESHOLD 3
-#define CALIBRATE_CYCLES 10
+// #define CALIBRATE_THRESHOLD 2
+#define CALIBRATE_CYCLES 15
 static bool calibrate = true;
 static int calibrateValue = 5000;
 static uint8_t currentCycles = 0;
@@ -35,22 +35,10 @@ void read(){
     Serial.println(val);
 }
 
-void setup() {
-    // Serial.begin(9600);
-
-    pinMode(LED_BUILTIN, OUTPUT);
-    digitalWrite(LED_BUILTIN, HIGH);
-
-    s.enableTransmit(10);
-    s.setProtocol(PROTOCOL, PULSE_LENGTH);
-    s.setRepeatTransmit(NUM_REPEATS);
-    
-    s.send(ON_VALUE, VALUE_LEN);
-}
-
 void calibrateHelper(){
     int x = analogRead(APIN);
-    bool withinThreshold = abs(x-calibrateValue) < CALIBRATE_THRESHOLD;
+    // bool withinThreshold = abs(x-calibrateValue) < CALIBRATE_THRESHOLD;
+    bool withinThreshold = x==calibrateValue;
     currentCycles = withinThreshold ? currentCycles + 1 : 0;
 
     calibrateValue = x;
@@ -62,19 +50,30 @@ void calibrateHelper(){
     delay(CALIBRATE_DELAY);
 }
 
+void setup() {
+    // Serial.begin(9600);
+
+    pinMode(LED_BUILTIN, OUTPUT);
+    digitalWrite(LED_BUILTIN, HIGH);
+
+    s.enableTransmit(10);
+    s.setProtocol(PROTOCOL, PULSE_LENGTH);
+    s.setRepeatTransmit(NUM_REPEATS);
+    
+    s.send(ON_VALUE, VALUE_LEN);
+    while(calibrate){
+        calibrateHelper();
+    }
+}
+
+
 static int r;
 void loop() {
-
-    if(calibrate){
-        calibrateHelper();
-        return;
-    }
-
     r = analogRead(APIN);
-    if( abs(r - calibrateValue) < A_READ_THRESHOLD ){return;}
+    if( r - calibrateValue < A_READ_THRESHOLD ){return;}
     // redundant measurement
     r = analogRead(APIN);
-    if( abs(r - calibrateValue) < A_READ_THRESHOLD){return;}
+    if( r - calibrateValue < A_READ_THRESHOLD){return;}
 
     s.send(OFF_VALUE, VALUE_LEN);
 
