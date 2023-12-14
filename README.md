@@ -1,4 +1,6 @@
-# Arduino RF Switch
+# Arduino RF Switch (MOVED)
+## NOTE:
+### This repo has been merged into: https://github.com/PrinceOfPuppers/smart-home-server, No further updated will happen here
 
 > A Device Which Converts Light Switches Into RF Remotes
 - [SETUP](#SETUP)
